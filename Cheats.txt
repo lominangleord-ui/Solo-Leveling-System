@@ -1,0 +1,129 @@
+The problem is that sysPatch() calls location.reload(), which wipes everything you defined in the console. So after the first command, the helpers are gone.
+
+Two fixes:
+
+Fix 1: Re-paste the helpers after every reload
+Paste this block every time the page reloads:
+
+JavaScript
+
+window.sysGet = () => JSON.parse(localStorage.getItem("sl_fitness_v3") || "{}");
+window.sysSave = (d) => localStorage.setItem("sl_fitness_v3", JSON.stringify(d));
+window.sysPatch = (p) => { sysSave({ ...sysGet(), ...p }); location.reload(); };
+window.sysShow = () => console.table(sysGet());
+window.sysReset = () => { localStorage.removeItem("sl_fitness_v3"); location.reload(); };
+console.log("✓ Helpers loaded");
+Fix 2: Use these standalone one-liners instead
+Each one works on its own — no setup needed. Just paste and the page reloads with the change applied.
+
+Trigger Penalty + Lockdown:
+
+JavaScript
+
+(()=>{const k="sl_fitness_v3",d=JSON.parse(localStorage.getItem(k)||"{}");Object.assign(d,{penalty:true,inLockdown:true,lockdownSource:"console_test",penaltyEnd:Date.now()+6*3600*1000,penPushDone:0,penSitDone:0,penRunDone:false,hp:80,streak:0});localStorage.setItem(k,JSON.stringify(d));location.reload();})();
+Penalty Almost Complete (test submit):
+
+JavaScript
+
+(()=>{const k="sl_fitness_v3",d=JSON.parse(localStorage.getItem(k)||"{}");Object.assign(d,{penalty:true,inLockdown:true,lockdownSource:"test",penaltyEnd:Date.now()+6*3600*1000,penPushDone:190,penSitDone:195,penRunDone:false,hp:80});localStorage.setItem(k,JSON.stringify(d));location.reload();})();
+Penalty Timer Expired (triggers another -20 HP on tick):
+
+JavaScript
+
+(()=>{const k="sl_fitness_v3",d=JSON.parse(localStorage.getItem(k)||"{}");Object.assign(d,{penalty:true,inLockdown:true,lockdownSource:"expired",penaltyEnd:Date.now()-1000,penPushDone:0,penSitDone:0,penRunDone:false,hp:40});localStorage.setItem(k,JSON.stringify(d));location.reload();})();
+Force Death (HP=10 + expired timer):
+
+JavaScript
+
+(()=>{const k="sl_fitness_v3",d=JSON.parse(localStorage.getItem(k)||"{}");Object.assign(d,{penalty:true,inLockdown:true,lockdownSource:"death",penaltyEnd:Date.now()-1000,hp:10,penPushDone:0,penSitDone:0,penRunDone:false});localStorage.setItem(k,JSON.stringify(d));location.reload();})();
+Exit Lockdown:
+
+JavaScript
+
+(()=>{const k="sl_fitness_v3",d=JSON.parse(localStorage.getItem(k)||"{}");Object.assign(d,{penalty:false,inLockdown:false,lockdownSource:null,penaltyEnd:0,penPushDone:0,penSitDone:0,penRunDone:false,hp:100});localStorage.setItem(k,JSON.stringify(d));location.reload();})();
+Give 5 Relapse Tokens:
+
+JavaScript
+
+(()=>{const k="sl_fitness_v3",d=JSON.parse(localStorage.getItem(k)||"{}");d.relapseTokens=5;localStorage.setItem(k,JSON.stringify(d));location.reload();})();
+Low HP (Danger Mode):
+
+JavaScript
+
+(()=>{const k="sl_fitness_v3",d=JSON.parse(localStorage.getItem(k)||"{}");Object.assign(d,{hp:20,hpMax:100,inLockdown:false,penalty:false});localStorage.setItem(k,JSON.stringify(d));location.reload();})();
+Complete Daily Quest (triggers reward overlay):
+
+JavaScript
+
+(()=>{const k="sl_fitness_v3",d=JSON.parse(localStorage.getItem(k)||"{}");Object.assign(d,{push:100,sit:100,squat:100,run:10,pushDone:true,sitDone:true,squatDone:true,runDone:true,dailyCompleted:true,streak:(d.streak||0)+1,xp:(d.xp||0)+500,pts:(d.pts||0)+3,gold:(d.gold||0)+100,hp:d.hpMax||100,mp:d.mpMax||50,rewardChoicePending:true,history:[{date:new Date().toLocaleDateString(),items:["100 Push-ups","100 Sit-ups","100 Squats","10km Run"],xpGain:500},...(d.history||[])]});localStorage.setItem(k,JSON.stringify(d));location.reload();})();
+Reset Daily Quest:
+
+JavaScript
+
+(()=>{const k="sl_fitness_v3",d=JSON.parse(localStorage.getItem(k)||"{}");Object.assign(d,{push:0,sit:0,squat:0,run:0,pushDone:false,sitDone:false,squatDone:false,runDone:false,dailyCompleted:false,rewardChoicePending:false});localStorage.setItem(k,JSON.stringify(d));location.reload();})();
+Open Reward Choice Overlay:
+
+JavaScript
+
+(()=>{const k="sl_fitness_v3",d=JSON.parse(localStorage.getItem(k)||"{}");d.rewardChoicePending=true;localStorage.setItem(k,JSON.stringify(d));location.reload();})();
+Spawn Urgent Quest (60s timer):
+
+JavaScript
+
+(()=>{const k="sl_fitness_v3",d=JSON.parse(localStorage.getItem(k)||"{}");Object.assign(d,{urgentActive:true,urgentQuest:{id:"assassin-push",name:"Assassin Ambush: Push-up Burst",exercise:"push",target:12,rewardXp:700,rewardGold:140,drop:{id:101,name:"Knight Killer Dagger",kind:"weapon",icon:"dagger",multiplier:1.15,desc:"+15% XP while equipped."}},urgentEnd:Date.now()+60*1000});localStorage.setItem(k,JSON.stringify(d));location.reload();})();
+Spawn Special Quest:
+
+JavaScript
+
+(()=>{const k="sl_fitness_v3",d=JSON.parse(localStorage.getItem(k)||"{}");Object.assign(d,{specialActive:true,specialQuest:{name:"Challenge: 50 Extra Push-ups",desc:"Emergency training protocol.",reward:"+200 XP, +1 STR",xp:200,stat:"str"},relapseTokens:(d.relapseTokens||0)+1});localStorage.setItem(k,JSON.stringify(d));location.reload();})();
+Give 9999 Gold:
+
+JavaScript
+
+(()=>{const k="sl_fitness_v3",d=JSON.parse(localStorage.getItem(k)||"{}");d.gold=9999;localStorage.setItem(k,JSON.stringify(d));location.reload();})();
+Give 10 Potions + 20 Stat Points:
+
+JavaScript
+
+(()=>{const k="sl_fitness_v3",d=JSON.parse(localStorage.getItem(k)||"{}");Object.assign(d,{potions:10,pts:20});localStorage.setItem(k,JSON.stringify(d));location.reload();})();
+Jump to Level 50 (S-Rank):
+
+JavaScript
+
+(()=>{const k="sl_fitness_v3",d=JSON.parse(localStorage.getItem(k)||"{}");Object.assign(d,{level:50,xp:0,xpMax:5000,str:80,agi:80,vit:80,hpMax:900,hp:900,mpMax:290,mp:290,pts:25});localStorage.setItem(k,JSON.stringify(d));location.reload();})();
+Give All Inventory + Themes:
+
+JavaScript
+
+(()=>{const k="sl_fitness_v3",d=JSON.parse(localStorage.getItem(k)||"{}");Object.assign(d,{gold:9999,inventory:[{id:100,name:"System Blue HUD",kind:"theme",icon:"gem",theme:"system-blue",desc:"Default system theme."},{id:101,name:"Knight Killer Dagger",kind:"weapon",icon:"dagger",multiplier:1.15,desc:"+15% XP while equipped."},{id:102,name:"Steel Sword",kind:"weapon",icon:"sword",multiplier:1.2,desc:"+20% XP while equipped."},{id:103,name:"Shadow Sigil",kind:"relic",icon:"moon",multiplier:1.1,desc:"+10% XP while equipped."},{id:104,name:"Shadow Purple HUD",kind:"theme",icon:"gem",theme:"shadow-purple",desc:"Unlocks purple HUD theme."},{id:105,name:"Monarch Gold HUD",kind:"theme",icon:"sparkles",theme:"monarch-gold",desc:"Unlocks gold HUD theme."}]});localStorage.setItem(k,JSON.stringify(d));location.reload();})();
+Switch to Shadow Purple Theme:
+
+JavaScript
+
+(()=>{const k="sl_fitness_v3",d=JSON.parse(localStorage.getItem(k)||"{}");d.hudTheme="shadow-purple";localStorage.setItem(k,JSON.stringify(d));location.reload();})();
+Switch to Monarch Gold Theme:
+
+JavaScript
+
+(()=>{const k="sl_fitness_v3",d=JSON.parse(localStorage.getItem(k)||"{}");d.hudTheme="monarch-gold";localStorage.setItem(k,JSON.stringify(d));location.reload();})();
+Activate XP Boost (×1.5 for 15 min):
+
+JavaScript
+
+(()=>{const k="sl_fitness_v3",d=JSON.parse(localStorage.getItem(k)||"{}");Object.assign(d,{xpBoostMultiplier:1.5,xpBoostEnd:Date.now()+15*60*1000});localStorage.setItem(k,JSON.stringify(d));location.reload();})();
+View Current Save (no reload):
+
+JavaScript
+
+console.table(JSON.parse(localStorage.getItem("sl_fitness_v3")||"{}"));
+Wipe Everything:
+
+JavaScript
+
+localStorage.removeItem("sl_fitness_v3"); location.reload();
+God Mode (full test setup):
+
+JavaScript
+
+(()=>{const k="sl_fitness_v3",d=JSON.parse(localStorage.getItem(k)||"{}");Object.assign(d,{name:d.name||"Hunter",level:50,pts:50,streak:30,hp:900,hpMax:900,mp:290,mpMax:290,xp:0,xpMax:5000,str:80,agi:80,vit:80,gold:9999,potions:20,relapseTokens:10,penalty:false,inLockdown:false,lockdownSource:null,fatigueLevel:0,hudTheme:"shadow-purple",notifiedTitles:[]});localStorage.setItem(k,JSON.stringify(d));location.reload();})();
+Pro tip: In Chrome DevTools, go to Sources → Snippets → New Snippet, paste any of these, and press Ctrl+Enter to run. They'll persist across reloads as saved snippets.
